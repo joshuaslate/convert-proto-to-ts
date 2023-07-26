@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package company_name.services.auth.v1;
+
+import "google/api/annotations.proto";
+import "company_name/services/auth/v1/team.proto";
+import "google/protobuf/timestamp.proto";
+
+service UserService {
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users"
+    };
+  }
+}
+
+message ListUsersRequest {
+  string team_id = 1;
+  string page = 2;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  string next_page_cursor = 2;
+}
+
+message User {
+  int64 id = 1;
+  string email = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  map<string, string> metadata = 5;
+  bool is_admin = 6;
+  repeated Team teams = 7;
+  Role role = 8;
+  Status status = 9;
+  Profile profile = 10;
+
+  oneof permission {
+    bool full_access = 11;
+    string scope = 12;
+  }
+
+  message Profile {
+    string language = 1;
+    string timezone = 2;
+    Theme theme = 3;
+
+    enum Theme {
+      THEME_UNSPECIFIED = 0;
+      THEME_DARK = 1;
+      THEME_LIGHT = 2;
+    }
+  }
+
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_CLOSED = 1;
+    STATUS_ACTIVE = 2;
+  }
+}
+
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_CUSTOMER = 1;
+  ROLE_ADMIN = 2;
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package company_name.services.auth.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Team {
+  string id = 1;
+  string name = 2;
+  google.protobuf.Timestamp created_at = 3;
+}

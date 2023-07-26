@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "moduleResolution": "Node",
+    "target": "ESNext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
+}

@@ -1,0 +1,11 @@
+# IDE
+.idea
+
+# Test files
+generated
+
+# Built files
+dist
+
+# Dependencies
+node_modules

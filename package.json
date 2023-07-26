@@ -13,6 +13,7 @@
     "test": "vitest run",
     "clean": "rm -rf dist",
     "build": "pnpm run clean && rollup -c rollup.config.js",
+    "publish": "pnpm run build && pnpm publish",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "keywords": ["protobuf", "typescript", "code generation"],

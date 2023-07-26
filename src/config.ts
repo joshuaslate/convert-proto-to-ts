@@ -126,7 +126,9 @@ export async function loadConfig(): Promise<Config> {
           ...fileContentAsObject,
         };
       } catch (e) {
-        throw new Error(`[proto-to-ts]: error encountered while parsing custom .proto_to_ts_config.json file: ${e}`);
+        throw new Error(
+          `[convert-proto-to-ts]: error encountered while parsing custom .proto_to_ts_config.json file: ${e}`,
+        );
       }
     }
   }

@@ -1,11 +1,11 @@
-# Proto to TS
+# Covert Proto to TS
 A CLI tool to generate TypeScript type definitions from Protocol buffer (`.proto`) files.
 
 ## How to Use
 Run the following command, then answer the prompts. See below for more configuration options.
 
 ```sh
-npx proto-to-ts
+npx convert-proto-to-ts
 ```
 
 ## Configuration

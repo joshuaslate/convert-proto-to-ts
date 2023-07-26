@@ -49,7 +49,7 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
   const protoPaths = collectProtos(protoPath);
 
   if (!protoPaths.length) {
-    throw new Error(`[proto-to-ts]: no .proto files found in ${protoPath}`);
+    throw new Error(`[convert-proto-to-ts]: no .proto files found in ${protoPath}`);
   }
 
   root.loadSync(protoPaths, {
@@ -133,5 +133,5 @@ export async function loadAndParseProtos(cwd: string, providedConfig: Config) {
     return collectAndParseProtos(inputPath, config);
   }
 
-  throw new Error('[proto-to-ts]: no proto definitions were found');
+  throw new Error('[convert-proto-to-ts]: no proto definitions were found');
 }

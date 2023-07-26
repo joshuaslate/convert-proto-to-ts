@@ -11,7 +11,7 @@ exports[`ProtoToTypeScriptGenerator > should generate types from a given directo
 }
 
 ",
-    "path": "generated/company_name/services/auth/v1/team.ts",
+    "path": "generated_from_proto/company_name/services/auth/v1/team.ts",
   },
   {
     "content": "import type { AuthV1Team } from './team';
@@ -55,13 +55,13 @@ export enum AuthV1Role {
 }
 
 ",
-    "path": "generated/company_name/services/auth/v1/user.ts",
+    "path": "generated_from_proto/company_name/services/auth/v1/user.ts",
   },
   {
     "content": "export * from './company_name/services/auth/v1/team';
 export * from './company_name/services/auth/v1/user';
 ",
-    "path": "generated/index.ts",
+    "path": "generated_from_proto/index.ts",
   },
 ]
 `;

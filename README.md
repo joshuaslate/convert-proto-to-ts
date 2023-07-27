@@ -1,4 +1,6 @@
-# Covert Proto to TS
+# Convert Proto to TS
+[![CI](https://github.com/joshuaslate/convert-proto-to-ts/actions/workflows/main.yml/badge.svg)](https://github.com/joshuaslate/convert-proto-to-ts/actions/workflows/main.yml) [![npm downloads](https://img.shields.io/npm/dm/convert-proto-to-ts)](https://www.npmjs.com/package/convert-proto-to-ts)
+
 A CLI tool to generate TypeScript type definitions from Protocol buffer (`.proto`) files.
 
 ## How to Use

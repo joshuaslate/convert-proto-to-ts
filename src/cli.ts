@@ -1,16 +1,17 @@
 import fs from 'fs';
 import path from 'path';
-import { loadConfig } from './config';
+import { loadConfig, parseCLIArgs } from './config';
 import { loadAndParseProtos } from './load';
 import { ProtoToTypeScriptGenerator } from './generator';
 
 interface Args {
   cwd: string;
+  args: string[];
 }
 
-export async function cli({ cwd }: Args) {
+export async function cli({ cwd, args }: Args) {
   try {
-    const config = await loadConfig();
+    const config = await loadConfig(parseCLIArgs(args));
     const root = await loadAndParseProtos(cwd, config);
     const generator = new ProtoToTypeScriptGenerator(config, root);
 

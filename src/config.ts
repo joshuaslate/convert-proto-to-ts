@@ -111,7 +111,7 @@ export const defaultConfig: Config = {
   typeNameCase: TypeNameCase.Pascal,
 };
 
-export async function loadConfig(): Promise<Config> {
+export async function loadConfig(configFromArgs: Partial<Config>): Promise<Config> {
   const foundConfigPath = await findUp('.proto_to_ts_config.json');
 
   if (foundConfigPath) {
@@ -124,6 +124,7 @@ export async function loadConfig(): Promise<Config> {
         return {
           ...defaultConfig,
           ...fileContentAsObject,
+          ...configFromArgs,
         };
       } catch (e) {
         throw new Error(
@@ -134,4 +135,32 @@ export async function loadConfig(): Promise<Config> {
   }
 
   return defaultConfig;
+}
+
+const CLI_ARGS_TO_CONFIG_KEY: Record<string, keyof Config> = {
+  'git-repository': 'protoGitRepository',
+  'proto-path': 'protoPath',
+};
+
+export function parseCLIArgs(args: string[]): Partial<Config> {
+  const config: Partial<Config> = {};
+  let configItem: keyof Config | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const configKey = CLI_ARGS_TO_CONFIG_KEY[args[i].substring(2).toLowerCase()];
+
+    if (configItem) {
+      if (!configKey) {
+        config[configItem] = args[i] as any;
+      }
+
+      configItem = undefined;
+    } else {
+      if (configKey) {
+        configItem = configKey;
+      }
+    }
+  }
+
+  return config;
 }

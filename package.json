@@ -1,6 +1,6 @@
 {
   "name": "convert-proto-to-ts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "bin/index.js",
   "repository": "https://github.com/joshuaslate/convert-proto-to-ts",
@@ -8,7 +8,10 @@
     "convert-proto-to-ts": "./bin/index.js"
   },
   "type": "module",
-  "files": ["bin", "dist"],
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
     "start": "node --loader ts-node/esm src/index.ts",
     "test": "vitest run",
@@ -17,7 +20,11 @@
     "publish": "pnpm run build && pnpm publish",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
-  "keywords": ["protobuf", "typescript", "code generation"],
+  "keywords": [
+    "protobuf",
+    "typescript",
+    "code generation"
+  ],
   "author": "Joshua Slate",
   "license": "MIT",
   "devDependencies": {
@@ -25,14 +32,14 @@
     "@types/inquirer": "^9.0.3",
     "@types/node": "^20.4.4",
     "prettier": "^3.0.0",
-    "rollup": "^3.26.3",
+    "rollup": "^3.27.0",
     "tslib": "^2.6.1",
     "vitest": "^0.33.0"
   },
   "dependencies": {
     "change-case": "^4.1.2",
     "find-up": "^6.3.0",
-    "inquirer": "^9.2.8",
+    "inquirer": "^9.2.9",
     "protobufjs": "^7.2.4",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"

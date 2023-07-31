@@ -1,5 +1,6 @@
 import { findUp } from 'find-up';
 import fs from 'fs/promises';
+import {cli} from "./cli";
 
 export enum ProtoSource {
   Git = 'Git',
@@ -111,6 +112,18 @@ export const defaultConfig: Config = {
   typeNameCase: TypeNameCase.Pascal,
 };
 
+function mergeConfigs(cliArgs: Partial<Config>, configFile?: Partial<Config>) {
+  const { protoPath, protoGitRepository, ...restOfConfigFile } = configFile || {};
+
+  return {
+    ...defaultConfig,
+    ...restOfConfigFile,
+    protoPath: cliArgs.protoGitRepository ? undefined : protoPath,
+    protoGitRepository: cliArgs.protoPath ? undefined : protoGitRepository,
+    ...cliArgs,
+  }
+}
+
 export async function loadConfig(configFromArgs: Partial<Config>): Promise<Config> {
   const foundConfigPath = await findUp('.proto_to_ts_config.json');
 
@@ -121,22 +134,7 @@ export async function loadConfig(configFromArgs: Partial<Config>): Promise<Confi
       try {
         const fileContentAsObject = JSON.parse(fileContent);
 
-        const config: Config = {
-          ...defaultConfig,
-          ...fileContentAsObject,
-          ...configFromArgs,
-        };
-
-        // Config from args should take precedence to all others
-        if (configFromArgs.protoPath) {
-          delete config.protoGitRepository;
-        }
-
-        if (configFromArgs.protoGitRepository) {
-          delete config.protoPath;
-        }
-
-        return config;
+        return mergeConfigs(configFromArgs, fileContentAsObject);
       } catch (e) {
         throw new Error(
           `[convert-proto-to-ts]: error encountered while parsing custom .proto_to_ts_config.json file: ${e}`,
@@ -145,7 +143,7 @@ export async function loadConfig(configFromArgs: Partial<Config>): Promise<Confi
     }
   }
 
-  return defaultConfig;
+  return mergeConfigs(configFromArgs);
 }
 
 const CLI_ARGS_TO_CONFIG_KEY: Record<string, keyof Config> = {

@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 
 describe(ProtoToTypeScriptGenerator, () => {
   it('should generate types from a given directory of protos', async () => {
-    const config = await loadConfig();
+    const config = await loadConfig({});
     config.protoPath = 'protos';
     config.fileHeaderCommentTemplate = undefined;
     config.indexFileHeaderCommentTemplate = undefined;

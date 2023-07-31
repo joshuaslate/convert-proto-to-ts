@@ -121,11 +121,22 @@ export async function loadConfig(configFromArgs: Partial<Config>): Promise<Confi
       try {
         const fileContentAsObject = JSON.parse(fileContent);
 
-        return {
+        const config: Config = {
           ...defaultConfig,
           ...fileContentAsObject,
           ...configFromArgs,
         };
+
+        // Config from args should take precedence to all others
+        if (configFromArgs.protoPath) {
+          delete config.protoGitRepository;
+        }
+
+        if (configFromArgs.protoGitRepository) {
+          delete config.protoPath;
+        }
+
+        return config;
       } catch (e) {
         throw new Error(
           `[convert-proto-to-ts]: error encountered while parsing custom .proto_to_ts_config.json file: ${e}`,

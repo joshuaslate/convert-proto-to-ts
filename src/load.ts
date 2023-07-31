@@ -48,6 +48,11 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
   const root = new protobuf.Root();
   const protoPaths = collectProtos(protoPath);
 
+  // Add wellknown and wrapper types
+  for (const commonType in protobuf.common) {
+    root.addJSON((protobuf.common as any)[commonType].nested);
+  }
+
   if (!protoPaths.length) {
     throw new Error(`[convert-proto-to-ts]: no .proto files found in ${protoPath}`);
   }

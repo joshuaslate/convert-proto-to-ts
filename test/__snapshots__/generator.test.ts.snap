@@ -16,6 +16,11 @@ exports[`ProtoToTypeScriptGenerator > should generate types from a given directo
   {
     "content": "import type { AuthV1Team } from './team';
 
+export interface AuthV1CreateUserRequest {
+    email?: string;
+    profileData?: { '@type': string, value: any };
+}
+
 export interface AuthV1ListUsersRequest {
     teamId?: string;
     page?: string;

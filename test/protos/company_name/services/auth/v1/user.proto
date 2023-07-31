@@ -4,6 +4,8 @@ package company_name.services.auth.v1;
 
 import "google/api/annotations.proto";
 import "company_name/services/auth/v1/team.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 service UserService {
@@ -12,6 +14,18 @@ service UserService {
       get: "/api/v1/users"
     };
   }
+
+  rpc CreateUser(CreateUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/users"
+      body: "*"
+    };
+  }
+}
+
+message CreateUserRequest {
+  string email = 1;
+  google.protobuf.Any profile_data = 2;
 }
 
 message ListUsersRequest {

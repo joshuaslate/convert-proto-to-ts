@@ -3,6 +3,7 @@
 
 # Test files
 generated
+generated_from_proto
 
 # Built files
 dist

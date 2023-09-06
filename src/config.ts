@@ -1,6 +1,6 @@
 import { findUp } from 'find-up';
 import fs from 'fs/promises';
-import {cli} from "./cli";
+import { cli } from './cli';
 
 export enum ProtoSource {
   Git = 'Git',
@@ -121,7 +121,7 @@ function mergeConfigs(cliArgs: Partial<Config>, configFile?: Partial<Config>) {
     protoPath: cliArgs.protoGitRepository ? undefined : protoPath,
     protoGitRepository: cliArgs.protoPath ? undefined : protoGitRepository,
     ...cliArgs,
-  }
+  };
 }
 
 export async function loadConfig(configFromArgs: Partial<Config>): Promise<Config> {

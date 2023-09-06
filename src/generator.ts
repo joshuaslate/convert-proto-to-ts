@@ -286,7 +286,9 @@ export class ProtoToTypeScriptGenerator {
       baseFieldType,
     );
 
-    if (field.partOf instanceof protobuf.OneOf) {
+    // If the field is part of a oneof, add a comment to indicate the start and end of the oneof,
+    // but if proto3_optional is set to true, don't treat it as a oneof (protobuf.js does, probably for backwards compatibility)
+    if (field.partOf instanceof protobuf.OneOf && !field.options?.['proto3_optional']) {
       if (field.id === field.partOf.fieldsArray[0].id) {
         member = ts.addSyntheticLeadingComment(
           member,

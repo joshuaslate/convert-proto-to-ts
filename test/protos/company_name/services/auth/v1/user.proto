@@ -26,6 +26,12 @@ service UserService {
 message CreateUserRequest {
   string email = 1;
   google.protobuf.Any profile_data = 2;
+  optional MFASetup mfa_setup = 3;
+
+  message MFASetup {
+    string mfa_secret = 1;
+    string otp = 2;
+  }
 }
 
 message ListUsersRequest {

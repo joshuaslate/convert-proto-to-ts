@@ -19,6 +19,10 @@ exports[`ProtoToTypeScriptGenerator > should generate types from a given directo
 export interface AuthV1CreateUserRequest {
     email?: string;
     profileData?: { '@type': string, value: any };
+    mfaSetup?: {
+        mfaSecret?: string;
+        otp?: string;
+    };
 }
 
 export interface AuthV1ListUsersRequest {

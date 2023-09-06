@@ -42,27 +42,13 @@ function replaceVariables<T = {}>(template: string, variables: T, padVariable?: 
 function getRelativePath(source: string, target: string) {
   const targetArr = target.split('/');
   const sourceArr = source.split('/');
+  // Remove filename from end of source & target, discard source
+  sourceArr.pop();
   const targetFileName = targetArr.pop();
-  const targetPath = targetArr.join('/');
-  let relativePath = '';
 
-  while (!targetPath.includes(sourceArr.join('/'))) {
-    sourceArr.pop();
+  const relativePath = path.relative(sourceArr.join('/'), targetArr.join('/'));
 
-    if (targetPath.includes(sourceArr.join('/')) && !relativePath) {
-      return `./${targetFileName}`;
-    }
-
-    relativePath += '../';
-  }
-
-  const relPathArr = targetArr.slice(sourceArr.length);
-
-  if (relPathArr.length) {
-    relativePath += relPathArr.join(path.sep) + path.sep;
-  }
-
-  return relativePath + targetFileName;
+  return (relativePath ? `${relativePath}/${targetFileName}` : `./${targetFileName}`).replaceAll(path.sep, '/');
 }
 
 function getCaseFunction(caseName: TypeNameCase) {

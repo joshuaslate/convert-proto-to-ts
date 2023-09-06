@@ -4,6 +4,7 @@
 # Test files
 generated
 generated_from_proto
+private_test
 
 # Built files
 dist

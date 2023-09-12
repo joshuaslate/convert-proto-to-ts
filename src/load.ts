@@ -3,6 +3,7 @@ import path from 'path';
 import protobuf from 'protobufjs';
 import fs from 'fs';
 import { execSync } from 'child_process';
+import { getInstalledPathSync } from 'get-installed-path';
 import { Config, ProtoSource } from './config';
 
 interface Answers {
@@ -29,7 +30,7 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
 }
 
 function collectGoogleTypeProtos(dir?: string): string[] {
-  const usableDir = dir || path.dirname(require.resolve('protobufjs/package.json'));
+  const usableDir = dir || getInstalledPathSync('protobufjs', { local: true });
   const googleTypes: string[] = [];
 
   fs.readdirSync(usableDir).forEach((file) => {

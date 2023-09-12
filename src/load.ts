@@ -28,6 +28,23 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
   });
 }
 
+function collectGoogleTypeProtos(dir?: string): string[] {
+  const usableDir = dir || path.dirname(require.resolve('protobufjs/package.json'));
+  const googleTypes: string[] = [];
+
+  fs.readdirSync(usableDir).forEach((file) => {
+    const fullPath = path.join(usableDir, file);
+
+    if (fs.statSync(fullPath).isDirectory()) {
+      googleTypes.push(...collectGoogleTypeProtos(fullPath));
+    } else if (path.extname(fullPath) === '.proto') {
+      googleTypes.push(fullPath);
+    }
+  });
+
+  return googleTypes;
+}
+
 function collectProtos(dir: string): string[] {
   const protos: string[] = [];
 
@@ -56,6 +73,9 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
   if (!protoPaths.length) {
     throw new Error(`[convert-proto-to-ts]: no .proto files found in ${protoPath}`);
   }
+
+  // Load in all the Google types
+  root.loadSync(collectGoogleTypeProtos());
 
   root.loadSync(protoPaths, {
     keepCase: config.fieldNameKeepCase,

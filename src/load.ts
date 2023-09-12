@@ -3,7 +3,7 @@ import path from 'path';
 import protobuf from 'protobufjs';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { getInstalledPathSync } from 'get-installed-path';
+import { resolve } from 'import-meta-resolve';
 import { Config, ProtoSource } from './config';
 
 interface Answers {
@@ -29,25 +29,10 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
   });
 }
 
-function collectGoogleTypeProtos(dir?: string): string[] {
-  const usableDir = dir || getInstalledPathSync('protobufjs', { local: true });
-  const googleTypes: string[] = [];
-
-  fs.readdirSync(usableDir).forEach((file) => {
-    const fullPath = path.join(usableDir, file);
-
-    if (fs.statSync(fullPath).isDirectory()) {
-      googleTypes.push(...collectGoogleTypeProtos(fullPath));
-    } else if (path.extname(fullPath) === '.proto') {
-      googleTypes.push(fullPath);
-    }
-  });
-
-  return googleTypes;
-}
-
 function collectProtos(dir: string): string[] {
   const protos: string[] = [];
+
+  // console.log(dir);
 
   fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.join(dir, file);
@@ -66,17 +51,24 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
   const root = new protobuf.Root();
   const protoPaths = collectProtos(protoPath);
 
-  // Add wellknown and wrapper types
+  // // Add wellknown and wrapper types
   for (const commonType in protobuf.common) {
     root.addJSON((protobuf.common as any)[commonType].nested);
   }
 
+  // Load in all the Google types
+  root.loadSync(
+    collectProtos(
+      path
+        .dirname(resolve('protobufjs', import.meta.url))
+        .replace('file:///', '')
+        .replace('file://', ''),
+    ),
+  );
+
   if (!protoPaths.length) {
     throw new Error(`[convert-proto-to-ts]: no .proto files found in ${protoPath}`);
   }
-
-  // Load in all the Google types
-  root.loadSync(collectGoogleTypeProtos());
 
   root.loadSync(protoPaths, {
     keepCase: config.fieldNameKeepCase,

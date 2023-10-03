@@ -3,7 +3,7 @@ import path from 'path';
 import protobuf from 'protobufjs';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { moduleResolve } from 'import-meta-resolve';
+import { resolve } from 'import-meta-resolve';
 import { Config, ProtoSource } from './config';
 
 interface Answers {
@@ -58,7 +58,7 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
   root.loadSync(
     collectProtos(
       path
-        .dirname(moduleResolve('protobufjs', new URL(import.meta.url), new Set(['node', 'import']), true).toString())
+        .dirname(resolve('protobufjs', import.meta.url))
         .replace('file:///', '')
         .replace('file://', ''),
     ),

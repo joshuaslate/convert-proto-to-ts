@@ -3,7 +3,7 @@ import path from 'path';
 import protobuf from 'protobufjs';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { resolve } from 'import-meta-resolve';
+import { moduleResolve } from 'import-meta-resolve';
 import { Config, ProtoSource } from './config';
 
 interface Answers {
@@ -32,8 +32,6 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
 function collectProtos(dir: string): string[] {
   const protos: string[] = [];
 
-  // console.log(dir);
-
   fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.join(dir, file);
 
@@ -60,7 +58,7 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
   root.loadSync(
     collectProtos(
       path
-        .dirname(resolve('protobufjs', import.meta.url))
+        .dirname(moduleResolve('protobufjs', new URL(import.meta.url), new Set(['node', 'import']), true).toString())
         .replace('file:///', '')
         .replace('file://', ''),
     ),

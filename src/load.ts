@@ -32,8 +32,6 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
 function collectProtos(dir: string): string[] {
   const protos: string[] = [];
 
-  // console.log(dir);
-
   fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.join(dir, file);
 

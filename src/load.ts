@@ -30,43 +30,6 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
   });
 }
 
-function getClonedRepositoryName(cwd: string, tempFolder: string) {
-  const buff = execSync(`git config --file ${tempFolder}/.git/config --get remote.origin.url`, {
-    cwd: path.resolve(cwd, ''),
-  });
-
-  const originUrl = buff.toString('utf-8');
-  const lastSegment = url.parse(originUrl)?.pathname?.split('/').pop();
-
-  if (!lastSegment) {
-    return 'unknown';
-  }
-
-  if (path.extname(lastSegment) === '.git') {
-    return path.basename(lastSegment, '.git');
-  }
-
-  return path.basename(lastSegment);
-}
-
-function nestClonedRepository(cwd: string, tempFolder: string) {
-  const repositoryName = getClonedRepositoryName(cwd, tempFolder);
-
-  fs.mkdirSync(path.join(tempFolder, repositoryName));
-
-  fs.readdirSync(tempFolder).forEach((file) => {
-    const fullPath = path.join(tempFolder, file);
-
-    if (fs.statSync(fullPath).isDirectory()) {
-      if (file === '.git' || !fs.existsSync(path.join(fullPath, '.git'))) {
-        fs.renameSync(fullPath, path.join(tempFolder, repositoryName, file));
-      }
-    } else {
-      fs.renameSync(fullPath, path.join(tempFolder, repositoryName, file));
-    }
-  });
-}
-
 function collectProtos(dir: string): string[] {
   const protos: string[] = [];
 
@@ -171,9 +134,19 @@ export async function loadAndParseProtos(cwd: string, providedConfig: Config) {
       cloneGitRepository(cwd, config.protoGitRepository, tempDirPath);
     } else {
       for (const repo of config.protoGitRepository) {
+        let repositoryName = '';
+        const lastSegment = url.parse(repo)?.pathname?.split('/').pop();
+
+        if (lastSegment) {
+          if (path.extname(lastSegment) === '.git') {
+            repositoryName = path.basename(lastSegment, '.git');
+          } else {
+            repositoryName = path.basename(lastSegment);
+          }
+        }
+
         // Clone into temp directory
-        cloneGitRepository(cwd, repo, tempDirPath);
-        nestClonedRepository(cwd, tempDirPath);
+        cloneGitRepository(cwd, repo, repositoryName ? `${tempDirPath}/${repositoryName}` : tempDirPath);
       }
     }
 

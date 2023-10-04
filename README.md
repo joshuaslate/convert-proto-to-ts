@@ -20,8 +20,8 @@ To further configure the CLI, create a file called `.proto_to_ts_config.json` at
 interface Config {
   // tempDir is the path, relative to the root, that the proto files are cloned into if an option is provided for protoGitRepository
   tempDir: string;
-  // protoGitRepository is the repository that will be git cloned in order to pull proto definitions
-  protoGitRepository?: string;
+  // protoGitRepository is the repository (or repositories) that will be git cloned in order to pull proto definitions
+  protoGitRepository?: string | string[];
   // protoPath is the path, relative to the root, to proto definitions on your local file system
   protoPath?: string;
   // outputPath is the path, relative to the root, where the generated TypeScript files will be saved

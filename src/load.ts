@@ -2,6 +2,7 @@ import inquirer, { QuestionCollection } from 'inquirer';
 import path from 'path';
 import protobuf from 'protobufjs';
 import fs from 'fs';
+import url from 'url';
 import { execSync } from 'child_process';
 import { resolve } from 'import-meta-resolve';
 import { Config, ProtoSource } from './config';
@@ -26,6 +27,43 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
   execSync(`git clone ${repositoryUrl} ${tempFolder}`, {
     stdio: [0, 1, 2], // print command output
     cwd: path.resolve(cwd, ''),
+  });
+}
+
+function getClonedRepositoryName(cwd: string, tempFolder: string) {
+  const buff = execSync(`git config --file ${tempFolder}/.git/config --get remote.origin.url`, {
+    cwd: path.resolve(cwd, ''),
+  });
+
+  const originUrl = buff.toString('utf-8');
+  const lastSegment = url.parse(originUrl)?.pathname?.split('/').pop();
+
+  if (!lastSegment) {
+    return 'unknown';
+  }
+
+  if (path.extname(lastSegment) === '.git') {
+    return path.basename(lastSegment, '.git');
+  }
+
+  return path.basename(lastSegment);
+}
+
+function nestClonedRepository(cwd: string, tempFolder: string) {
+  const repositoryName = getClonedRepositoryName(cwd, tempFolder);
+
+  fs.mkdirSync(path.join(tempFolder, repositoryName));
+
+  fs.readdirSync(tempFolder).forEach((file) => {
+    const fullPath = path.join(tempFolder, file);
+
+    if (fs.statSync(fullPath).isDirectory()) {
+      if (file === '.git' || !fs.existsSync(path.join(fullPath, '.git'))) {
+        fs.renameSync(fullPath, path.join(tempFolder, repositoryName, file));
+      }
+    } else {
+      fs.renameSync(fullPath, path.join(tempFolder, repositoryName, file));
+    }
   });
 }
 
@@ -129,7 +167,15 @@ export async function loadAndParseProtos(cwd: string, providedConfig: Config) {
 
     console.log(`Cloning protos from ${config.protoGitRepository} into temporary directory: ${tempDirPath}`);
 
-    cloneGitRepository(cwd, config.protoGitRepository, tempDirPath);
+    if (typeof config.protoGitRepository === 'string') {
+      cloneGitRepository(cwd, config.protoGitRepository, tempDirPath);
+    } else {
+      for (const repo of config.protoGitRepository) {
+        // Clone into temp directory
+        cloneGitRepository(cwd, repo, tempDirPath);
+        nestClonedRepository(cwd, tempDirPath);
+      }
+    }
 
     console.log('Parsing cloned .proto files');
     const root = collectAndParseProtos(tempDirPath, config);

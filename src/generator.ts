@@ -1,4 +1,5 @@
 import protobuf from 'protobufjs';
+// @ts-ignore
 import { camelCase, constantCase, pascalCase, snakeCase } from 'change-case';
 import path from 'path';
 import ts from 'typescript';

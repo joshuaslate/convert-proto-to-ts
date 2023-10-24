@@ -60,7 +60,6 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
     collectProtos(
       path
         .dirname(resolve('protobufjs', import.meta.url))
-        .replace('file:///', '')
         .replace('file://', ''),
     ),
   );

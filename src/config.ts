@@ -124,10 +124,19 @@ function mergeConfigs(cliArgs: Partial<Config>, configFile?: Partial<Config>) {
 }
 
 export async function loadConfig(configFromArgs: Partial<Config>): Promise<Config> {
-  const foundConfigPath = await findUp('.proto_to_ts_config.json');
+  const configJs = await findUp('.proto_to_ts_config.js');
 
-  if (foundConfigPath) {
-    const fileContent = await fs.readFile(foundConfigPath, 'utf8');
+  if (configJs) {
+    const configModule = await import(configJs);
+
+    if (configModule?.default) {
+      return mergeConfigs(configFromArgs, configModule.default);
+    }
+  }
+
+  const configJSON = await findUp('.proto_to_ts_config.json');
+  if (configJSON) {
+    const fileContent = await fs.readFile(configJSON, 'utf8');
 
     if (fileContent) {
       try {

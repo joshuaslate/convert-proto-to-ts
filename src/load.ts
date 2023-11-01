@@ -56,13 +56,7 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
   }
 
   // Load in all the Google types
-  root.loadSync(
-    collectProtos(
-      path
-        .dirname(resolve('protobufjs', import.meta.url))
-        .replace('file://', ''),
-    ),
-  );
+  root.loadSync(collectProtos(url.fileURLToPath(path.dirname(resolve('protobufjs', import.meta.url)))));
 
   if (!protoPaths.length) {
     throw new Error(`[convert-proto-to-ts]: no .proto files found in ${protoPath}`);

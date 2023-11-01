@@ -3,9 +3,15 @@ syntax = "proto3";
 package company_name.services.auth.v1;
 
 import "google/protobuf/timestamp.proto";
+import "listify/v1/annotations.proto";
 
 message Team {
   string id = 1;
-  string name = 2;
-  google.protobuf.Timestamp created_at = 3;
+  string name = 2 [
+    (listify.v1.rules).string.open_text.searching.searchable = true
+  ];
+  optional string birth_date = 3 [
+    (listify.v1.rules).string.date.filtering.filterable = true
+  ];
+  google.protobuf.Timestamp created_at = 4;
 }

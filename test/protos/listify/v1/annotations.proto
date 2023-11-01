@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package listify.v1;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/pentops/protoc-gen-listify/listify/v1;listify";
+
+extend google.protobuf.MethodOptions {
+  MethodOptions api = 86510000;
+}
+
+message MethodOptions {
+  bool enable = 1;
+}
+
+extend google.protobuf.FieldOptions {
+  FieldRulesOptions rules = 86510001;
+}
+
+extend google.protobuf.OneofOptions {
+  OneofRulesOptions oneof_rules = 86510002;
+}
+
+message OneofRulesOptions {
+  bool filterable = 1;
+}
+
+message FieldRulesOptions {
+  oneof type {
+    NumericRules   double    =  1;
+    NumericRules   fixed32   =  2;
+    NumericRules   fixed64   =  3;
+    NumericRules   float     =  4;
+    NumericRules   int32     =  5;
+    NumericRules   int64     =  6;
+    NumericRules   sfixed32  =  7;
+    NumericRules   sfixed64  =  8;
+    NumericRules   sint32    =  9;
+    NumericRules   sint64    = 10;
+    NumericRules   uint32    = 11;
+    NumericRules   uint64    = 12;
+    BoolRules      bool      = 13;
+    StringRules    string    = 14;
+
+    EnumRules      enum      = 20;
+
+    TimestampRules timestamp = 30;
+  }
+}
+
+message NumericRules {
+  bool filterable = 1;
+  bool sortable   = 2;
+}
+
+message BoolRules {
+  bool filterable = 1;
+}
+
+message StringRules {
+  oneof well_known {
+    OpenTextRules   open_text   = 1;
+    DateRules       date        = 2;
+    ForeignKeyRules foreign_key = 3;
+  }
+}
+
+message OpenTextRules {
+  bool searchable = 1;
+}
+
+message DateRules {
+  bool filterable = 1;
+}
+
+message ForeignKeyRules {
+  oneof type {
+    UniqueStringRules unique_string = 1;
+    UuidRules         uuid          = 2;
+  }
+}
+
+message UniqueStringRules {
+  bool filterable = 1;
+}
+
+message UuidRules {
+  bool filterable = 1;
+}
+
+message EnumRules {
+  bool filterable = 1;
+}
+
+message TimestampRules {
+  bool filterable = 1;
+  bool sortable   = 2;
+}

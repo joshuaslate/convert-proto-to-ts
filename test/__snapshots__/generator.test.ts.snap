@@ -6,6 +6,7 @@ exports[`ProtoToTypeScriptGenerator > should generate types from a given directo
     "content": "export interface AuthV1Team {
     id?: string;
     name?: string;
+    birthDate?: string;
     // format: date-time
     createdAt?: string;
 }
@@ -15,6 +16,7 @@ exports[`ProtoToTypeScriptGenerator > should generate types from a given directo
   },
   {
     "content": "import type { AuthV1Team } from './team';
+import type { ListifyV1PageRequest, ListifyV1Search, ListifyV1Sort, ListifyV1Filter, ListifyV1PageResponse } from '../../../../listify/v1/fields';
 
 export interface AuthV1CreateUserRequest {
     email?: string;
@@ -27,12 +29,15 @@ export interface AuthV1CreateUserRequest {
 
 export interface AuthV1ListUsersRequest {
     teamId?: string;
-    page?: string;
+    page?: ListifyV1PageRequest;
+    search?: ListifyV1Search;
+    sorts?: ListifyV1Sort[];
+    filters?: ListifyV1Filter[];
 }
 
 export interface AuthV1ListUsersResponse {
     users?: AuthV1User[];
-    nextPageCursor?: string;
+    page?: ListifyV1PageResponse;
 }
 
 export interface AuthV1User {
@@ -67,8 +72,237 @@ export enum AuthV1Role {
     "path": "generated_from_proto/company_name/services/auth/v1/user.ts",
   },
   {
+    "content": "export interface ListifyV1MethodOptions {
+    enable?: boolean;
+}
+
+export interface ListifyV1OneofRulesOptions {
+    filterable?: boolean;
+}
+
+export interface ListifyV1FieldRulesOptions {
+    // start oneof \\"type\\"
+    double?: ListifyV1NumericRules;
+    fixed32?: ListifyV1NumericRules;
+    fixed64?: ListifyV1NumericRules;
+    float?: ListifyV1NumericRules;
+    int32?: ListifyV1NumericRules;
+    int64?: ListifyV1NumericRules;
+    sfixed32?: ListifyV1NumericRules;
+    sfixed64?: ListifyV1NumericRules;
+    sint32?: ListifyV1NumericRules;
+    sint64?: ListifyV1NumericRules;
+    uint32?: ListifyV1NumericRules;
+    uint64?: ListifyV1NumericRules;
+    bool?: ListifyV1BoolRules;
+    string?: ListifyV1StringRules;
+    enum?: ListifyV1EnumRules;
+    timestamp?: ListifyV1TimestampRules; // end oneof \\"type\\"
+}
+
+export interface ListifyV1NumericRules {
+    filterable?: boolean;
+    sortable?: boolean;
+}
+
+export interface ListifyV1BoolRules {
+    filterable?: boolean;
+}
+
+export interface ListifyV1StringRules {
+    // start oneof \\"wellKnown\\"
+    openText?: ListifyV1OpenTextRules;
+    date?: ListifyV1DateRules;
+    foreignKey?: ListifyV1ForeignKeyRules; // end oneof \\"wellKnown\\"
+}
+
+export interface ListifyV1OpenTextRules {
+    searchable?: boolean;
+}
+
+export interface ListifyV1DateRules {
+    filterable?: boolean;
+}
+
+export interface ListifyV1ForeignKeyRules {
+    // start oneof \\"type\\"
+    uniqueString?: ListifyV1UniqueStringRules;
+    uuid?: ListifyV1UuidRules; // end oneof \\"type\\"
+}
+
+export interface ListifyV1UniqueStringRules {
+    filterable?: boolean;
+}
+
+export interface ListifyV1UuidRules {
+    filterable?: boolean;
+}
+
+export interface ListifyV1EnumRules {
+    filterable?: boolean;
+}
+
+export interface ListifyV1TimestampRules {
+    filterable?: boolean;
+    sortable?: boolean;
+}
+
+",
+    "path": "generated_from_proto/listify/v1/annotations.ts",
+  },
+  {
+    "content": "export interface ListifyV1PageRequest {
+    token?: string;
+    limit?: string;
+}
+
+export interface ListifyV1PageResponse {
+    nextToken?: string;
+    finalPage?: boolean;
+    totalPageRecords?: string;
+    totalRecords?: string;
+}
+
+export interface ListifyV1Search {
+    query?: string;
+}
+
+export interface ListifyV1Sort {
+    field?: string;
+    descending?: boolean;
+}
+
+export interface ListifyV1Filter {
+    field?: string;
+    // start oneof \\"filterValue\\"
+    value?: string;
+    range?: ListifyV1Range; // end oneof \\"filterValue\\"
+}
+
+export interface ListifyV1FilterClauses {
+    clauses?: ListifyV1FilterClause[];
+}
+
+export interface ListifyV1FilterClause {
+    predicate?: string;
+    arguments?: ListifyV1FilterArgument[];
+}
+
+export interface ListifyV1FilterArgument {
+    // start oneof \\"kind\\"
+    double?: number;
+    fixed32?: number;
+    fixed64?: string;
+    float?: number;
+    int32?: number;
+    int64?: string;
+    sfixed32?: number;
+    sfixed64?: string;
+    sint32?: number;
+    sint64?: string;
+    uint32?: number;
+    uint64?: string;
+    string?: string; // end oneof \\"kind\\"
+}
+
+export interface ListifyV1Range {
+    // start oneof \\"type\\"
+    double?: ListifyV1DoubleRange;
+    fixed32?: ListifyV1Fixed32Range;
+    fixed64?: ListifyV1Fixed64Range;
+    float?: ListifyV1FloatRange;
+    int32?: ListifyV1Int32Range;
+    int64?: ListifyV1Int64Range;
+    sfixed32?: ListifyV1SFixed32Range;
+    sfixed64?: ListifyV1SFixed64Range;
+    sint32?: ListifyV1SInt32Range;
+    sint64?: ListifyV1SInt64Range;
+    uint32?: ListifyV1UInt32Range;
+    uint64?: ListifyV1UInt64Range;
+    timestamp?: ListifyV1TimestampRange;
+    date?: ListifyV1DateRange; // end oneof \\"type\\"
+}
+
+export interface ListifyV1DoubleRange {
+    min?: number | null;
+    max?: number | null;
+}
+
+export interface ListifyV1Fixed32Range {
+    min?: number | null;
+    max?: number | null;
+}
+
+export interface ListifyV1Fixed64Range {
+    min?: string | null;
+    max?: string | null;
+}
+
+export interface ListifyV1FloatRange {
+    min?: number | null;
+    max?: number | null;
+}
+
+export interface ListifyV1Int32Range {
+    min?: number | null;
+    max?: number | null;
+}
+
+export interface ListifyV1Int64Range {
+    min?: string | null;
+    max?: string | null;
+}
+
+export interface ListifyV1SFixed32Range {
+    min?: number | null;
+    max?: number | null;
+}
+
+export interface ListifyV1SFixed64Range {
+    min?: string | null;
+    max?: string | null;
+}
+
+export interface ListifyV1SInt32Range {
+    min?: number | null;
+    max?: number | null;
+}
+
+export interface ListifyV1SInt64Range {
+    min?: string | null;
+    max?: string | null;
+}
+
+export interface ListifyV1UInt32Range {
+    min?: number | null;
+    max?: number | null;
+}
+
+export interface ListifyV1UInt64Range {
+    min?: string | null;
+    max?: string | null;
+}
+
+export interface ListifyV1TimestampRange {
+    // format: date-time
+    min?: string;
+    // format: date-time
+    max?: string;
+}
+
+export interface ListifyV1DateRange {
+    min?: string | null;
+    max?: string | null;
+}
+
+",
+    "path": "generated_from_proto/listify/v1/fields.ts",
+  },
+  {
     "content": "export * from './company_name/services/auth/v1/team';
 export * from './company_name/services/auth/v1/user';
+export * from './listify/v1/annotations';
+export * from './listify/v1/fields';
 ",
     "path": "generated_from_proto/index.ts",
   },

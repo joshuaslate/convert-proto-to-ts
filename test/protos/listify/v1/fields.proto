@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package listify.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/pentops/protoc-gen-listify/listify/v1;listify";
+
+message PageRequest {
+  string token = 30;
+  int64  limit = 31;
+}
+
+message PageResponse {
+  string next_token         = 1;
+  bool   final_page         = 2;
+  int64  total_page_records = 3;
+  int64  total_records      = 4;
+}
+
+message Search {
+  string query = 1;
+}
+
+message Sort {
+  string field      = 1;
+  bool   descending = 2;
+}
+
+message Filter {
+  string field = 1;
+
+  oneof filter_value {
+    option (validate.required) = true;
+
+    string value = 2;
+    Range  range = 3;
+  }
+}
+
+message FilterClauses {
+  repeated FilterClause clauses = 1;
+}
+
+message FilterClause {
+  string                  predicate = 1;
+  repeated FilterArgument arguments = 2;
+}
+
+message FilterArgument {
+  oneof kind {
+    double   double    =  1;
+    fixed32  fixed32   =  2;
+    fixed64  fixed64   =  3;
+    float    float     =  4;
+    int32    int32     =  5;
+    int64    int64     =  6;
+    sfixed32 sfixed32  =  7;
+    sfixed64 sfixed64  =  8;
+    sint32   sint32    =  9;
+    sint64   sint64    = 10;
+    uint32   uint32    = 11;
+    uint64   uint64    = 12;
+    string   string    = 13;
+  }
+}
+
+message Range {
+  oneof type {
+    option (validate.required) = true;
+
+    DoubleRange   double   =  1;
+    Fixed32Range  fixed32  =  2;
+    Fixed64Range  fixed64  =  3;
+    FloatRange    float    =  4;
+    Int32Range    int32    =  5;
+    Int64Range    int64    =  6;
+    SFixed32Range sfixed32 =  7;
+    SFixed64Range sfixed64 =  8;
+    SInt32Range   sint32   =  9;
+    SInt64Range   sint64   = 10;
+    UInt32Range   uint32   = 11;
+    UInt64Range   uint64   = 12;
+
+    TimestampRange timestamp = 20;
+    DateRange      date      = 21;
+  }
+}
+
+message DoubleRange {
+  google.protobuf.DoubleValue min = 1;
+  google.protobuf.DoubleValue max = 2;
+}
+
+message Fixed32Range {
+  google.protobuf.UInt32Value min = 1;
+  google.protobuf.UInt32Value max = 2;
+}
+
+message Fixed64Range {
+  google.protobuf.UInt64Value min = 1;
+  google.protobuf.UInt64Value max = 2;
+}
+
+message FloatRange {
+  google.protobuf.FloatValue min = 1;
+  google.protobuf.FloatValue max = 2;
+}
+
+message Int32Range {
+  google.protobuf.Int32Value min = 1;
+  google.protobuf.Int32Value max = 2;
+}
+
+message Int64Range {
+  google.protobuf.Int64Value min = 1;
+  google.protobuf.Int64Value max = 2;
+}
+
+message SFixed32Range {
+  google.protobuf.Int32Value min = 1;
+  google.protobuf.Int32Value max = 2;
+}
+
+message SFixed64Range {
+  google.protobuf.Int64Value min = 1;
+  google.protobuf.Int64Value max = 2;
+}
+
+message SInt32Range {
+  google.protobuf.Int32Value min = 1;
+  google.protobuf.Int32Value max = 2;
+}
+
+message SInt64Range {
+  google.protobuf.Int64Value min = 1;
+  google.protobuf.Int64Value max = 2;
+}
+
+message UInt32Range {
+  google.protobuf.UInt32Value min = 1;
+  google.protobuf.UInt32Value max = 2;
+}
+
+message UInt64Range {
+  google.protobuf.UInt64Value min = 1;
+  google.protobuf.UInt64Value max = 2;
+}
+
+message TimestampRange {
+  google.protobuf.Timestamp min = 1;
+  google.protobuf.Timestamp max = 2;
+}
+
+message DateRange {
+  // Valid values for min are: YYYY, YYYY-MM, or YYYY-MM-DD
+  google.protobuf.StringValue min = 1 [
+    (validate.rules).string.pattern = "([0-9]{4}-?([0-9]{2})?-?([0-9]{2})?)"
+  ];
+
+  // Valid values for max are: YYYY, YYYY-MM, or YYYY-MM-DD
+  google.protobuf.StringValue max = 2 [
+    (validate.rules).string.pattern = "([0-9]{4}-?([0-9]{2})?-?([0-9]{2})?)"
+  ];
+}

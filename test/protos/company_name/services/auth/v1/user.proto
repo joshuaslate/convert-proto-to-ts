@@ -7,12 +7,15 @@ import "company_name/services/auth/v1/team.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
+import "listify/v1/annotations.proto";
 
 service UserService {
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
     option (google.api.http) = {
       get: "/api/v1/users"
     };
+
+    option (listify.v1.api) = {enable: true rank_field: "id"};
   }
 
   rpc CreateUser(CreateUserRequest) returns (google.protobuf.Empty) {
@@ -36,12 +39,16 @@ message CreateUserRequest {
 
 message ListUsersRequest {
   string team_id = 1;
-  string page = 2;
+
+  listify.v1.PageRequest     page    = 100;
+  listify.v1.Search          search  = 101;
+  repeated listify.v1.Sort   sorts   = 102;
+  repeated listify.v1.Filter filters = 103;
 }
 
 message ListUsersResponse {
   repeated User users = 1;
-  string next_page_cursor = 2;
+  listify.v1.PageResponse page = 100;
 }
 
 message User {

@@ -30,9 +30,9 @@
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/inquirer": "^9.0.6",
-    "@types/node": "^20.8.8",
+    "@types/node": "^20.8.10",
     "prettier": "^3.0.3",
-    "rollup": "^4.1.4",
+    "rollup": "^4.2.0",
     "tslib": "^2.6.2",
     "vitest": "^0.34.6"
   },

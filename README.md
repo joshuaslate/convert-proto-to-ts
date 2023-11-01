@@ -14,7 +14,7 @@ npx convert-proto-to-ts
 
 ## Configuration
 
-To further configure the CLI, create a file called `.proto_to_ts_config.json` or `.proto_to_ts_config.js` at your project root. The available options are below.
+To further configure the CLI, create a file called `.proto_to_ts_config.js` at your project root. The available options are below.
 
 ```typescript
 interface Config {
@@ -102,5 +102,12 @@ interface Config {
    * Example: "DO NOT EDIT! Types generated at {{generationTimestamp}}."
    */
   indexFileHeaderCommentTemplate?: string;
+  /**
+   * customInterfaceBuilder can be set to provide custom overrides for how interfaces are generated. This allows you to assert more control over the
+   *  generated types. For example, you could use this to generate interfaces that have generic type parameters based on proto annotations. See the
+   *  .proto_to_ts_config.js in the root of this project for an example. Returning null will skip the interface being generated. Be careful there are
+   *  no dependencies on the skipped interface.
+   */
+  customInterfaceBuilder?: CustomInterfaceBuilder;
 }
 ```

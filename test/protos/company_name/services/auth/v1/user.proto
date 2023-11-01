@@ -54,7 +54,12 @@ message ListUsersResponse {
 message User {
   int64 id = 1;
   string email = 2;
-  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp created_at = 3 [
+    (listify.v1.rules).timestamp = {
+      filtering: { filterable: true }
+      sorting: { sortable: true default_sort: true }
+    }
+  ];
   google.protobuf.Timestamp updated_at = 4;
   map<string, string> metadata = 5;
   bool is_admin = 6;

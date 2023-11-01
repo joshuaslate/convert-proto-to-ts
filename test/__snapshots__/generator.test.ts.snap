@@ -167,13 +167,13 @@ export interface ListifyV1Search {
     query?: string;
 }
 
-export interface ListifyV1Sort {
-    field?: string;
+export interface ListifyV1Sort<T = any, Field extends keyof T | undefined = undefined> {
+    field: Field;
     descending?: boolean;
 }
 
-export interface ListifyV1Filter {
-    field?: string;
+export interface ListifyV1Filter<T = any, Field extends keyof T | undefined = undefined> {
+    field: Field;
     // start oneof \\"filterValue\\"
     value?: string;
     range?: ListifyV1Range; // end oneof \\"filterValue\\"

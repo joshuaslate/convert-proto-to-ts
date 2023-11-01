@@ -1,5 +1,7 @@
 import { findUp } from 'find-up';
 import fs from 'fs/promises';
+import protobuf from 'protobufjs';
+import { HeritageClause, ModifierLike, ModifierToken, TypeElement, TypeParameterDeclaration } from 'typescript';
 
 export enum ProtoSource {
   Git = 'Git',
@@ -12,6 +14,15 @@ export enum TypeNameCase {
   Pascal = 'pascalCase',
   Snake = 'snakeCase',
 }
+
+export type CustomMemberBuilder = (field: protobuf.Field) => TypeElement | undefined | null;
+
+export type CustomInterfaceBuilder = (node: protobuf.Type) => {
+  modifiers?: ModifierLike[];
+  typeParameters?: TypeParameterDeclaration[];
+  heritageClauses?: HeritageClause[];
+  customMemberBuilder?: CustomMemberBuilder;
+} | null;
 
 export interface Config {
   // tempDir is the path, relative to the root, that the proto files are cloned into if an option is provided for protoGitRepository
@@ -98,6 +109,7 @@ export interface Config {
    * Example: "DO NOT EDIT! Types generated at {{generationTimestamp}}."
    */
   indexFileHeaderCommentTemplate?: string;
+  customInterfaceBuilder?: CustomInterfaceBuilder;
 }
 
 export const defaultConfig: Config = {

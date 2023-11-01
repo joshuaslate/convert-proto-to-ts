@@ -2,8 +2,8 @@ import protobuf from 'protobufjs';
 // @ts-ignore
 import { camelCase, constantCase, pascalCase, snakeCase } from 'change-case';
 import path from 'path';
-import ts from 'typescript';
-import { Config, defaultConfig, TypeNameCase } from './config';
+import ts, { HeritageClause, ModifierLike, TypeParameterDeclaration } from 'typescript';
+import { Config, CustomInterfaceBuilder, CustomMemberBuilder, defaultConfig, TypeNameCase } from './config';
 
 const UNKNOWN_FILE_NAME = 'proto_to_ts_unknown_file_name.proto' as const;
 
@@ -312,7 +312,11 @@ export class ProtoToTypeScriptGenerator {
     return ts.factory.createTypeLiteralNode(members);
   }
 
-  private generateInterfaceMembersFromProtobufType(node: protobuf.Type, addImport: ImportAdder): ts.TypeElement[] {
+  private generateInterfaceMembersFromProtobufType(
+    node: protobuf.Type,
+    addImport: ImportAdder,
+    customMemberBuilder: CustomMemberBuilder | undefined,
+  ): ts.TypeElement[] {
     const members: ts.TypeElement[] = [];
 
     if (!node.fieldsArray.length) {
@@ -320,7 +324,13 @@ export class ProtoToTypeScriptGenerator {
     }
 
     for (const field of node.fieldsArray) {
-      let member = this.generateFieldMember(field, addImport);
+      const customMember = customMemberBuilder?.(field);
+
+      if (customMember === null) {
+        continue;
+      }
+
+      let member = customMember || this.generateFieldMember(field, addImport);
 
       if (member) {
         if (this.config.generatedTypeComments?.[field.type]) {
@@ -343,13 +353,45 @@ export class ProtoToTypeScriptGenerator {
     node: protobuf.Type,
     generatedName: string,
     addImport: ImportAdder,
-  ): ts.Node {
+    customInterfaceBuilder?: CustomInterfaceBuilder,
+  ): ts.Node | undefined {
+    const modifiers: ModifierLike[] = [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)];
+    const typeParameters: TypeParameterDeclaration[] = [];
+    let heritageClauses: HeritageClause[] | undefined;
+    let memberBuilder: CustomMemberBuilder | undefined;
+
+    if (customInterfaceBuilder) {
+      const custom = customInterfaceBuilder(node);
+
+      if (custom === null) {
+        return;
+      }
+
+      const {
+        modifiers: customModifiers,
+        typeParameters: customTypeParameters,
+        heritageClauses: customHeritageClauses,
+        customMemberBuilder,
+      } = custom;
+
+      if (customModifiers) {
+        modifiers.push(...customModifiers);
+      }
+
+      if (customTypeParameters) {
+        typeParameters.push(...customTypeParameters);
+      }
+
+      heritageClauses = customHeritageClauses;
+      memberBuilder = customMemberBuilder;
+    }
+
     return ts.factory.createInterfaceDeclaration(
-      [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+      modifiers,
       ts.factory.createIdentifier(generatedName),
-      [],
-      undefined,
-      this.generateInterfaceMembersFromProtobufType(node, addImport),
+      typeParameters,
+      heritageClauses,
+      this.generateInterfaceMembersFromProtobufType(node, addImport, memberBuilder),
     );
   }
 
@@ -393,6 +435,10 @@ export class ProtoToTypeScriptGenerator {
     if (node instanceof protobuf.Service) {
       for (const nestedItemName in node.nested) {
         this.collectTypes(node.nested[nestedItemName]);
+      }
+
+      for (const methodName in node.methods) {
+        this.collectTypes(node.methods[methodName]);
       }
     }
 
@@ -447,10 +493,16 @@ export class ProtoToTypeScriptGenerator {
               ts.factory.createIdentifier('\n'),
             );
           } else if (cachedType.type instanceof protobuf.Type) {
-            nodeList.push(
-              this.generateInterfaceFromProtobufType(cachedType.type, cachedType.generatedName, addImport),
-              ts.factory.createIdentifier('\n'),
+            const builtNode = this.generateInterfaceFromProtobufType(
+              cachedType.type,
+              cachedType.generatedName,
+              addImport,
+              this.config.customInterfaceBuilder,
             );
+
+            if (builtNode) {
+              nodeList.push(builtNode, ts.factory.createIdentifier('\n'));
+            }
           }
         }
       }

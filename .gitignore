@@ -5,7 +5,6 @@
 generated
 generated_from_proto
 private_test
-.proto_to_ts_config.js
 
 # Built files
 dist

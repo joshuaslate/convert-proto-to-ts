@@ -62,9 +62,13 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
     throw new Error(`[convert-proto-to-ts]: no .proto files found in ${protoPath}`);
   }
 
-  root.loadSync(protoPaths, {
-    keepCase: config.fieldNameKeepCase,
-    alternateCommentMode: true,
+  // Due to bug noted here: https://github.com/protobufjs/protobuf.js/issues/1937
+  // we need to load the files one-by-one so that errors are visible if a proto can't be loaded.
+  protoPaths.forEach((protoPath) => {
+    root.loadSync(protoPath, {
+      keepCase: config.fieldNameKeepCase,
+      alternateCommentMode: true,
+    });
   });
 
   root.resolveAll();

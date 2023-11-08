@@ -1,7 +1,6 @@
-const ts = require('typescript');
-const protobuf = require('protobufjs');
+import ts from 'typescript';
 
-module.exports = {
+export default {
   protoPath: 'test/protos',
   namespacesToIgnore: ['google'],
   typeNameIgnoreParentNodeNames: ['company_name', 'services'],
@@ -30,7 +29,6 @@ module.exports = {
               'field',
               undefined,
               ts.factory.createTypeReferenceNode('Field'),
-              undefined,
             );
           }
         },

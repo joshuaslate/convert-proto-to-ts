@@ -14,7 +14,7 @@ npx convert-proto-to-ts
 
 ## Configuration
 
-To further configure the CLI, create a file called `.proto_to_ts_config.js` at your project root. The available options are below.
+To further configure the CLI, create a file called `.proto_to_ts_config.js` at your project root with a default export matching the following type. The available options are below.
 
 ```typescript
 interface Config {

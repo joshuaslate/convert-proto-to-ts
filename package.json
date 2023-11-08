@@ -32,14 +32,14 @@
     "@types/inquirer": "^9.0.6",
     "@types/node": "^20.8.10",
     "prettier": "^3.0.3",
-    "rollup": "^4.2.0",
+    "rollup": "^4.3.0",
     "tslib": "^2.6.2",
     "vitest": "^0.34.6"
   },
   "dependencies": {
     "change-case": "^5.1.2",
     "find-up": "^6.3.0",
-    "import-meta-resolve": "^3.0.0",
+    "import-meta-resolve": "^4.0.0",
     "inquirer": "^9.2.11",
     "protobufjs": "^7.2.5",
     "typescript": "^5.2.2"

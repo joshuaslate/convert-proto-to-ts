@@ -61,6 +61,10 @@ function getCaseFunction(caseName: TypeNameCase) {
   }[caseName];
 }
 
+function isWellknown(node: protobuf.Type | protobuf.Enum | protobuf.Service | protobuf.Method) {
+  return node?.parent?.name === 'protobuf' && node?.parent?.parent?.name === 'google';
+}
+
 interface CachedType {
   generatedPath: string;
   generatedName: string;
@@ -140,38 +144,42 @@ export class ProtoToTypeScriptGenerator {
 
     // As per documentation at https://protobuf.dev/programming-guides/proto3/#json
     this.wellKnownMappings = {
-      'bool': 'boolean',
-      'double': 'number',
-      'float': 'number',
-      'int32': 'number',
-      'uint32': 'number',
-      'sint32': 'number',
-      'fixed32': 'number',
-      'sfixed32': 'number',
-      'string': 'string',
-      'int64': 'string',
-      'fixed64': 'string',
-      'uint64': 'string',
-      'sint64': 'string',
-      'sfixed64': 'string',
-      'bytes': 'string',
-      'google.protobuf.Timestamp': 'string',
-      'google.protobuf.Duration': 'string',
-      'google.protobuf.FieldMask': 'string',
-      'google.protobuf.BoolValue': 'boolean | null',
-      'google.protobuf.StringValue': 'string | null',
-      'google.protobuf.Int64Value': 'string | null',
-      'google.protobuf.UInt64Value': 'string | null',
-      'google.protobuf.BytesValue': 'string | null',
-      'google.protobuf.Int32Value': 'number | null',
-      'google.protobuf.UInt32Value': 'number | null',
-      'google.protobuf.FloatValue': 'number | null',
-      'google.protobuf.DoubleValue': 'number | null',
-      'google.protobuf.NullValue': 'null',
-      'google.protobuf.Empty': '{}',
-      'google.protobuf.ListValue': 'any[]',
-      'google.protobuf.Struct': 'Record<string, any>',
-      'google.protobuf.Any': "{ '@type': string, value: any }",
+      bool: 'boolean',
+      double: 'number',
+      float: 'number',
+      int32: 'number',
+      uint32: 'number',
+      sint32: 'number',
+      fixed32: 'number',
+      sfixed32: 'number',
+      string: 'string',
+      int64: 'string',
+      fixed64: 'string',
+      uint64: 'string',
+      sint64: 'string',
+      sfixed64: 'string',
+      bytes: 'string',
+      ...(config.generateWellknownTypes
+        ? {}
+        : {
+            'google.protobuf.Timestamp': 'string',
+            'google.protobuf.Duration': 'string',
+            'google.protobuf.FieldMask': 'string',
+            'google.protobuf.BoolValue': 'boolean | null',
+            'google.protobuf.StringValue': 'string | null',
+            'google.protobuf.Int64Value': 'string | null',
+            'google.protobuf.UInt64Value': 'string | null',
+            'google.protobuf.BytesValue': 'string | null',
+            'google.protobuf.Int32Value': 'number | null',
+            'google.protobuf.UInt32Value': 'number | null',
+            'google.protobuf.FloatValue': 'number | null',
+            'google.protobuf.DoubleValue': 'number | null',
+            'google.protobuf.NullValue': 'null',
+            'google.protobuf.Empty': '{}',
+            'google.protobuf.ListValue': 'any[]',
+            'google.protobuf.Struct': 'Record<string, any>',
+            'google.protobuf.Any': "{ '@type': string, value: any }",
+          }),
       ...(config.generatedTypeOverrides || {}),
     };
   }
@@ -208,7 +216,7 @@ export class ProtoToTypeScriptGenerator {
       if (field.map) {
         const mapField = field as protobuf.MapField;
         const keyMappedType = this.getFieldTypeMapping(
-          { ...field, type: mapField.keyType } as protobuf.Field,
+          { ...field, type: mapField.keyType, resolvedType: null } as protobuf.Field,
           addImport,
         );
         mappedType = `Record<${keyMappedType}, ${mappedType}>`;
@@ -235,7 +243,8 @@ export class ProtoToTypeScriptGenerator {
         [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
         ts.factory.createIdentifier(generatedName),
         Object.keys(protoEnum.values || {}).map((value) => {
-          const destutteredValue = pascalCase(value).replace(pascalCase(protoEnum.name), '');
+          const pascalValue = pascalCase(value);
+          const destutteredValue = pascalValue.replace(pascalCase(protoEnum.name), '') || pascalValue;
 
           return ts.factory.createEnumMember(
             ProtoToTypeScriptGenerator.getEnumKeyName(destutteredValue),
@@ -402,11 +411,21 @@ export class ProtoToTypeScriptGenerator {
     return ProtoToTypeScriptGenerator.buildTypeName(node, template, caseFn, this.config.typeNameIgnoreParentNodeNames);
   }
 
-  private buildGeneratedFilename(node: protobuf.Type | protobuf.Enum) {
+  private getBaseFilename(node: protobuf.Type | protobuf.Enum | protobuf.Service | protobuf.Method) {
+    let base = node.filename || node.parent?.filename || UNKNOWN_FILE_NAME;
+
+    if (base === UNKNOWN_FILE_NAME) {
+      if (isWellknown(node)) {
+        base = `google/protobuf/wellknown.proto`;
+      }
+    }
+
+    return base;
+  }
+
+  private buildGeneratedFilename(node: protobuf.Type | protobuf.Enum | protobuf.Service | protobuf.Method) {
     const pathRoot = this.config.tempDir.replaceAll(path.sep, '/');
-    const base = (node.filename || node.parent?.filename || UNKNOWN_FILE_NAME)
-      .replace(pathRoot, '')
-      .replace('.proto', '.ts');
+    const base = this.getBaseFilename(node).replace(pathRoot, '').replace('.proto', '.ts');
 
     return base.startsWith('/') ? base.substring(1) : base;
   }
@@ -545,6 +564,40 @@ export class ProtoToTypeScriptGenerator {
           ts.createSourceFile(fileToCreate, '', ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS),
         ),
       });
+    }
+
+    if (this.config.customFileBuilder) {
+      const customFiles = this.config.customFileBuilder(this.root, (lookupType: protobuf.Type) => {
+        if (!lookupType) {
+          return;
+        }
+
+        const typeResolvedFromCache = this.typeCache[ProtoToTypeScriptGenerator.buildTypeCacheKey(lookupType)];
+
+        if (typeResolvedFromCache) {
+          return {
+            path: typeResolvedFromCache.generatedPath,
+            name: typeResolvedFromCache.generatedName,
+          };
+        }
+
+        const mappedType = isWellknown(lookupType)
+          ? this.wellKnownMappings[`google.protobuf.${lookupType.name}`]
+          : this.wellKnownMappings[lookupType.name];
+
+        if (mappedType) {
+          return {
+            name: mappedType,
+          };
+        }
+      });
+
+      for (const customFile of customFiles) {
+        files.push({
+          content: customFile.content,
+          path: path.join(this.config.outputPath, customFile.path).replaceAll(path.sep, '/'),
+        });
+      }
     }
 
     if (this.config.generateIndexFile) {

@@ -2,6 +2,7 @@ import { findUp } from 'find-up';
 import fs from 'fs/promises';
 import protobuf from 'protobufjs';
 import { HeritageClause, ModifierLike, ModifierToken, TypeElement, TypeParameterDeclaration } from 'typescript';
+import url from 'url';
 
 export enum ProtoSource {
   Git = 'Git',
@@ -23,6 +24,15 @@ export type CustomInterfaceBuilder = (node: protobuf.Type) => {
   heritageClauses?: HeritageClause[];
   customMemberBuilder?: CustomMemberBuilder;
 } | null;
+
+export type TypeLookup = (node: protobuf.Type) => { name: string; path?: string } | undefined;
+
+export interface CustomFile {
+  path: string;
+  content: string;
+}
+
+export type CustomFileBuilder = (root: protobuf.Root, lookupType?: TypeLookup) => CustomFile[];
 
 export interface Config {
   // tempDir is the path, relative to the root, that the proto files are cloned into if an option is provided for protoGitRepository
@@ -109,7 +119,16 @@ export interface Config {
    * Example: "DO NOT EDIT! Types generated at {{generationTimestamp}}."
    */
   indexFileHeaderCommentTemplate?: string;
+  /**
+   * customInterfaceBuilder can be set to provide custom overrides for how interfaces are generated. This allows you to assert more control over the
+   *  generated types. For example, you could use this to generate interfaces that have generic type parameters based on proto annotations. See the
+   *  .proto_to_ts_config.js in the root of this project for an example. Returning null will skip the interface being generated. Be careful there are
+   *  no dependencies on the skipped interface.
+   */
   customInterfaceBuilder?: CustomInterfaceBuilder;
+  customFileBuilder?: CustomFileBuilder;
+  // generateWellknownTypes is true if you'd like to generate types for well-known types (e.g., google.protobuf.Timestamp)
+  generateWellknownTypes?: boolean;
 }
 
 export const defaultConfig: Config = {
@@ -139,7 +158,7 @@ export async function loadConfig(configFromArgs: Partial<Config>): Promise<Confi
   const configJs = await findUp('.proto_to_ts_config.js');
 
   if (configJs) {
-    const configModule = await import(configJs);
+    const configModule = await import(url.pathToFileURL(configJs).href);
 
     if (configModule?.default) {
       return mergeConfigs(configFromArgs, configModule.default);

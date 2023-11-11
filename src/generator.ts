@@ -325,16 +325,22 @@ export class ProtoToTypeScriptGenerator {
     node: protobuf.Type,
     addImport: ImportAdder,
     customMemberBuilder: CustomMemberBuilder | undefined,
+    memberOverrides: Record<string, ts.TypeElement | null> | undefined,
   ): ts.TypeElement[] {
     const members: ts.TypeElement[] = [];
 
     if (!node.fieldsArray.length) {
-      return members;
+      return Object.values(memberOverrides || {}).filter(Boolean) as ts.TypeElement[];
     }
 
     for (const field of node.fieldsArray) {
-      const customMember = customMemberBuilder?.(field);
+      const customMember =
+        memberOverrides?.[field.name] ||
+        customMemberBuilder?.(field, (f?: protobuf.Field) => {
+          return this.convertFieldType(f || field, addImport);
+        });
 
+      // If the custom member builder returns null, it's an explicit skip
       if (customMember === null) {
         continue;
       }
@@ -362,16 +368,18 @@ export class ProtoToTypeScriptGenerator {
     node: protobuf.Type,
     generatedName: string,
     addImport: ImportAdder,
-    customInterfaceBuilder?: CustomInterfaceBuilder,
+    customInterfaceBuilder: CustomInterfaceBuilder | undefined,
+    customMemberBuilder: CustomMemberBuilder | undefined,
   ): ts.Node | undefined {
     const modifiers: ModifierLike[] = [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)];
     const typeParameters: TypeParameterDeclaration[] = [];
     let heritageClauses: HeritageClause[] | undefined;
-    let memberBuilder: CustomMemberBuilder | undefined;
+    let members: Record<string, ts.TypeElement | null> | undefined;
 
     if (customInterfaceBuilder) {
       const custom = customInterfaceBuilder(node);
 
+      // If the custom interface builder returns null, it's an explicit skip
       if (custom === null) {
         return;
       }
@@ -380,8 +388,8 @@ export class ProtoToTypeScriptGenerator {
         modifiers: customModifiers,
         typeParameters: customTypeParameters,
         heritageClauses: customHeritageClauses,
-        customMemberBuilder,
-      } = custom;
+        members: customMembers,
+      } = custom || {};
 
       if (customModifiers) {
         modifiers.push(...customModifiers);
@@ -392,7 +400,7 @@ export class ProtoToTypeScriptGenerator {
       }
 
       heritageClauses = customHeritageClauses;
-      memberBuilder = customMemberBuilder;
+      members = customMembers;
     }
 
     return ts.factory.createInterfaceDeclaration(
@@ -400,7 +408,7 @@ export class ProtoToTypeScriptGenerator {
       ts.factory.createIdentifier(generatedName),
       typeParameters,
       heritageClauses,
-      this.generateInterfaceMembersFromProtobufType(node, addImport, memberBuilder),
+      this.generateInterfaceMembersFromProtobufType(node, addImport, customMemberBuilder, members),
     );
   }
 
@@ -517,6 +525,7 @@ export class ProtoToTypeScriptGenerator {
               cachedType.generatedName,
               addImport,
               this.config.customInterfaceBuilder,
+              this.config.customMemberBuilder,
             );
 
             if (builtNode) {

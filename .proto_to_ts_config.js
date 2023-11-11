@@ -10,6 +10,16 @@ export default {
   },
   indexFileHeaderCommentTemplate: 'DO NOT EDIT! Types generated at {{generationTimestamp}}.',
   fileHeaderCommentTemplate: 'DO NOT EDIT! Types generated from {{sourceFile}} at {{generationTimestamp}}.',
+  customMemberBuilder: (field) => {
+    if (field.name === 'field') {
+      return ts.factory.createPropertySignature(
+        undefined,
+        'field',
+        undefined,
+        ts.factory.createTypeReferenceNode('Field'),
+      );
+    }
+  },
   customInterfaceBuilder: (node) => {
     if (node.name === 'Filter' || node.name === 'Sort') {
       return {
@@ -22,19 +32,7 @@ export default {
             ts.factory.createTypeReferenceNode('undefined'),
           ),
         ],
-        customMemberBuilder: (field) => {
-          if (field.name === 'field') {
-            return ts.factory.createPropertySignature(
-              undefined,
-              'field',
-              undefined,
-              ts.factory.createTypeReferenceNode('Field'),
-            );
-          }
-        },
       };
     }
-
-    return {};
   },
 };

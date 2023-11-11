@@ -1,7 +1,7 @@
 import { findUp } from 'find-up';
 import fs from 'fs/promises';
 import protobuf from 'protobufjs';
-import { HeritageClause, ModifierLike, ModifierToken, TypeElement, TypeParameterDeclaration } from 'typescript';
+import { HeritageClause, ModifierLike, TypeElement, TypeNode, TypeParameterDeclaration } from 'typescript';
 import url from 'url';
 
 export enum ProtoSource {
@@ -16,13 +16,17 @@ export enum TypeNameCase {
   Snake = 'snakeCase',
 }
 
-export type CustomMemberBuilder = (field: protobuf.Field) => TypeElement | undefined | null;
+export type CustomMemberBuilder = (
+  field: protobuf.Field,
+  // field is optional, it defaults to the field specified in the first argument
+  getBaseFieldType?: (field?: protobuf.Field) => TypeNode | undefined,
+) => TypeElement | undefined | null;
 
 export type CustomInterfaceBuilder = (node: protobuf.Type) => {
   modifiers?: ModifierLike[];
   typeParameters?: TypeParameterDeclaration[];
   heritageClauses?: HeritageClause[];
-  customMemberBuilder?: CustomMemberBuilder;
+  members?: Record<string, TypeElement | null>;
 } | null;
 
 export type TypeLookup = (node: protobuf.Type) => { name: string; path?: string } | undefined;
@@ -121,11 +125,21 @@ export interface Config {
   indexFileHeaderCommentTemplate?: string;
   /**
    * customInterfaceBuilder can be set to provide custom overrides for how interfaces are generated. This allows you to assert more control over the
-   *  generated types. For example, you could use this to generate interfaces that have generic type parameters based on proto annotations. See the
-   *  .proto_to_ts_config.js in the root of this project for an example. Returning null will skip the interface being generated. Be careful there are
-   *  no dependencies on the skipped interface.
+   * generated types. For example, you could use this to generate interfaces that have generic type parameters based on proto annotations. See the
+   * .proto_to_ts_config.js in the root of this project for an example. Returning null will skip the interface being generated. Be careful there are
+   * no dependencies on the skipped interface. Returning undefined will use the default interface builder.
    */
   customInterfaceBuilder?: CustomInterfaceBuilder;
+  /**
+   * customMemberBuilder can be set to provide custom overrides for how fields (interface members) are generated. This allows you to assert more control over the
+   * generated types. For example, you can use this to generate a custom comment for a member or to have more control over how oneofs are generated.
+   * Returning null will skip the member being generated. Returning undefined will use the default member builder.
+   */
+  customMemberBuilder?: CustomMemberBuilder;
+  /**
+   * customFileBuilder allows you to generate entire custom files. This is helpful in the case where you'd like to generate something like an API client
+   * based on the Protobuf service definitions.
+   */
   customFileBuilder?: CustomFileBuilder;
   // generateWellknownTypes is true if you'd like to generate types for well-known types (e.g., google.protobuf.Timestamp)
   generateWellknownTypes?: boolean;

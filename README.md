@@ -109,5 +109,16 @@ interface Config {
    *  no dependencies on the skipped interface.
    */
   customInterfaceBuilder?: CustomInterfaceBuilder;
+  /**
+   * customMemberBuilder can be set to provide custom overrides for how fields (interface members) are generated. This allows you to assert more control over the
+   * generated types. For example, you can use this to generate a custom comment for a member or to have more control over how oneofs are generated.
+   * Returning null will skip the member being generated. Returning undefined will use the default member builder.
+   */
+  customMemberBuilder?: CustomMemberBuilder;
+  /**
+   * customFileBuilder allows you to generate entire custom files. This is helpful in the case where you'd like to generate something like an API client
+   * based on the Protobuf service definitions.
+   */
+  customFileBuilder?: CustomFileBuilder;
 }
 ```

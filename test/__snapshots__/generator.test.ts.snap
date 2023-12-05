@@ -57,9 +57,9 @@ export interface AuthV1User {
         timezone?: string;
         theme?: 'THEME_UNSPECIFIED' | 'THEME_DARK' | 'THEME_LIGHT';
     };
-    // start oneof \\"permission\\"
+    // start oneof "permission"
     fullAccess?: boolean;
-    scope?: string; // end oneof \\"permission\\"
+    scope?: string; // end oneof "permission"
 }
 
 export enum AuthV1Role {
@@ -81,7 +81,7 @@ export interface ListifyV1OneofRulesOptions {
 }
 
 export interface ListifyV1FieldRulesOptions {
-    // start oneof \\"type\\"
+    // start oneof "type"
     double?: ListifyV1NumericRules;
     fixed32?: ListifyV1NumericRules;
     fixed64?: ListifyV1NumericRules;
@@ -97,7 +97,7 @@ export interface ListifyV1FieldRulesOptions {
     bool?: ListifyV1BoolRules;
     string?: ListifyV1StringRules;
     enum?: ListifyV1EnumRules;
-    timestamp?: ListifyV1TimestampRules; // end oneof \\"type\\"
+    timestamp?: ListifyV1TimestampRules; // end oneof "type"
 }
 
 export interface ListifyV1NumericRules {
@@ -110,10 +110,10 @@ export interface ListifyV1BoolRules {
 }
 
 export interface ListifyV1StringRules {
-    // start oneof \\"wellKnown\\"
+    // start oneof "wellKnown"
     openText?: ListifyV1OpenTextRules;
     date?: ListifyV1DateRules;
-    foreignKey?: ListifyV1ForeignKeyRules; // end oneof \\"wellKnown\\"
+    foreignKey?: ListifyV1ForeignKeyRules; // end oneof "wellKnown"
 }
 
 export interface ListifyV1OpenTextRules {
@@ -125,9 +125,9 @@ export interface ListifyV1DateRules {
 }
 
 export interface ListifyV1ForeignKeyRules {
-    // start oneof \\"type\\"
+    // start oneof "type"
     uniqueString?: ListifyV1UniqueStringRules;
-    uuid?: ListifyV1UuidRules; // end oneof \\"type\\"
+    uuid?: ListifyV1UuidRules; // end oneof "type"
 }
 
 export interface ListifyV1UniqueStringRules {
@@ -174,9 +174,9 @@ export interface ListifyV1Sort<T = any, Field extends keyof T | undefined = unde
 
 export interface ListifyV1Filter<T = any, Field extends keyof T | undefined = undefined> {
     field: Field;
-    // start oneof \\"filterValue\\"
+    // start oneof "filterValue"
     value?: string;
-    range?: ListifyV1Range; // end oneof \\"filterValue\\"
+    range?: ListifyV1Range; // end oneof "filterValue"
 }
 
 export interface ListifyV1FilterClauses {
@@ -189,7 +189,7 @@ export interface ListifyV1FilterClause {
 }
 
 export interface ListifyV1FilterArgument {
-    // start oneof \\"kind\\"
+    // start oneof "kind"
     double?: number;
     fixed32?: number;
     fixed64?: string;
@@ -202,11 +202,11 @@ export interface ListifyV1FilterArgument {
     sint64?: string;
     uint32?: number;
     uint64?: string;
-    string?: string; // end oneof \\"kind\\"
+    string?: string; // end oneof "kind"
 }
 
 export interface ListifyV1Range {
-    // start oneof \\"type\\"
+    // start oneof "type"
     double?: ListifyV1DoubleRange;
     fixed32?: ListifyV1Fixed32Range;
     fixed64?: ListifyV1Fixed64Range;
@@ -220,7 +220,7 @@ export interface ListifyV1Range {
     uint32?: ListifyV1UInt32Range;
     uint64?: ListifyV1UInt64Range;
     timestamp?: ListifyV1TimestampRange;
-    date?: ListifyV1DateRange; // end oneof \\"type\\"
+    date?: ListifyV1DateRange; // end oneof "type"
 }
 
 export interface ListifyV1DoubleRange {

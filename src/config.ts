@@ -16,6 +16,8 @@ export enum TypeNameCase {
   Snake = 'snakeCase',
 }
 
+export type CustomEnumBuilder = (enumType: protobuf.Enum, generatedName?: string) => TypeElement | undefined | null;
+
 export type CustomMemberBuilder = (
   field: protobuf.Field,
   // field is optional, it defaults to the field specified in the first argument
@@ -47,6 +49,8 @@ export interface Config {
   protoPath?: string;
   // outputPath is the path, relative to the root, where the generated TypeScript files will be saved
   outputPath: string;
+  // clearOutputPath is true if you'd like to clear the output path before generating new files (default: true)
+  clearOutputPath?: boolean;
   // fieldNameKeepCase is true if you'd like to keep field casing instead of camel casing (passed to protobufjs loadSync options), defaults to false
   fieldNameKeepCase?: boolean;
   // namespacesToIgnore is an array of namespaces that you would like to avoid resolving types for, e.g., ["google"]
@@ -141,6 +145,11 @@ export interface Config {
    * based on the Protobuf service definitions.
    */
   customFileBuilder?: CustomFileBuilder;
+  /**
+   * customEnumBuilder allows you to generate custom enums. This allows you to assert more control over the generated types.
+   * If there is not a generatedName argument passed into the callback, the enum is nested and should be generated as an inline union type.
+   */
+  customEnumBuilder?: CustomEnumBuilder;
   // generateWellknownTypes is true if you'd like to generate types for well-known types (e.g., google.protobuf.Timestamp)
   generateWellknownTypes?: boolean;
 }
@@ -148,6 +157,7 @@ export interface Config {
 export const defaultConfig: Config = {
   tempDir: '__proto-to-ts-temp',
   outputPath: 'generated_from_proto',
+  clearOutputPath: true,
   fieldNameKeepCase: false,
   generateIndexFile: true,
   enumNameTemplate: '{{parentNodeNames}}{{typeName}}',

@@ -26,6 +26,8 @@ interface Config {
   protoPath?: string;
   // outputPath is the path, relative to the root, where the generated TypeScript files will be saved
   outputPath: string;
+  // clearOutputPath is true if you'd like to clear the output path before generating new files (default: true)
+  clearOutputPath?: boolean;
   // fieldNameKeepCase is true if you'd like to keep field casing instead of camel casing (passed to protobufjs loadSync options), defaults to false
   fieldNameKeepCase?: boolean;
   // namespacesToIgnore is an array of namespaces that you would like to avoid resolving types for, e.g., ["google"]
@@ -120,5 +122,9 @@ interface Config {
    * based on the Protobuf service definitions.
    */
   customFileBuilder?: CustomFileBuilder;
+  /**
+   * customEnumBuilder allows you to generate custom enums. This allows you to assert more control over the generated types.
+   */
+  customEnumBuilder?: CustomEnumBuilder;
 }
 ```

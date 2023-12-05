@@ -17,6 +17,11 @@ export async function cli({ cwd, args }: Args) {
 
     const typeDefinitionsByFile = generator.generateTypeDefinitionsByFile();
 
+    if (config.clearOutputPath) {
+      console.log('Clearing output path before writing new generated files');
+      fs.rmSync(path.join(cwd, config.outputPath), { recursive: true, force: true });
+    }
+
     for (const tsFile of typeDefinitionsByFile) {
       fs.mkdirSync(path.dirname(path.join(cwd, tsFile.path)), { recursive: true });
       fs.writeFileSync(path.join(cwd, tsFile.path), tsFile.content);

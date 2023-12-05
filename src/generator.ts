@@ -3,7 +3,14 @@ import protobuf from 'protobufjs';
 import { camelCase, constantCase, pascalCase, snakeCase } from 'change-case';
 import path from 'path';
 import ts, { HeritageClause, ModifierLike, TypeParameterDeclaration } from 'typescript';
-import { Config, CustomInterfaceBuilder, CustomMemberBuilder, defaultConfig, TypeNameCase } from './config';
+import {
+  Config,
+  CustomEnumBuilder,
+  CustomInterfaceBuilder,
+  CustomMemberBuilder,
+  defaultConfig,
+  TypeNameCase,
+} from './config';
 
 const UNKNOWN_FILE_NAME = 'proto_to_ts_unknown_file_name.proto' as const;
 
@@ -209,7 +216,7 @@ export class ProtoToTypeScriptGenerator {
       field.resolvedType instanceof protobuf.Enum &&
       !this.typeCache[ProtoToTypeScriptGenerator.buildTypeCacheKey(field.resolvedType)]
     ) {
-      node = this.generateEnumDefinition(field.resolvedType) as ts.TypeNode;
+      node = this.generateEnumDefinition(field.resolvedType, undefined, this.config.customEnumBuilder) as ts.TypeNode;
     } else {
       let mappedType = this.getFieldTypeMapping(field, addImport);
 
@@ -236,7 +243,20 @@ export class ProtoToTypeScriptGenerator {
     return node;
   }
 
-  private generateEnumDefinition(protoEnum: protobuf.Enum, generatedName?: string) {
+  private generateEnumDefinition(
+    protoEnum: protobuf.Enum,
+    generatedName?: string,
+    customEnumBuilder?: CustomEnumBuilder,
+  ) {
+    if (customEnumBuilder) {
+      const custom = customEnumBuilder(protoEnum);
+
+      // null values are an explicit skip
+      if (custom !== undefined) {
+        return custom;
+      }
+    }
+
     // If generatedName is not provided, a union type will be returned
     if (this.config.generateEnumType === 'enum' && generatedName) {
       return ts.factory.createEnumDeclaration(
@@ -515,10 +535,15 @@ export class ProtoToTypeScriptGenerator {
       for (const cachedType of typesByFile[fileToCreate]) {
         if (!(cachedType.type.parent instanceof protobuf.Type)) {
           if (cachedType.type instanceof protobuf.Enum) {
-            nodeList.push(
-              this.generateEnumDefinition(cachedType.type, cachedType.generatedName),
-              ts.factory.createIdentifier('\n'),
+            const enumValue = this.generateEnumDefinition(
+              cachedType.type,
+              cachedType.generatedName,
+              this.config.customEnumBuilder,
             );
+
+            if (enumValue) {
+              nodeList.push(enumValue, ts.factory.createIdentifier('\n'));
+            }
           } else if (cachedType.type instanceof protobuf.Type) {
             const builtNode = this.generateInterfaceFromProtobufType(
               cachedType.type,

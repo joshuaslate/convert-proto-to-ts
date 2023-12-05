@@ -1,6 +1,6 @@
 {
   "name": "convert-proto-to-ts",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "",
   "main": "bin/index.js",
   "repository": "https://github.com/joshuaslate/convert-proto-to-ts",

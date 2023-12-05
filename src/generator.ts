@@ -249,7 +249,7 @@ export class ProtoToTypeScriptGenerator {
     customEnumBuilder?: CustomEnumBuilder,
   ) {
     if (customEnumBuilder) {
-      const custom = customEnumBuilder(protoEnum);
+      const custom = customEnumBuilder(protoEnum, generatedName);
 
       // null values are an explicit skip
       if (custom !== undefined) {

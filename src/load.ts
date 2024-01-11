@@ -52,11 +52,19 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
 
   // // Add wellknown and wrapper types
   for (const commonType in protobuf.common) {
-    root.addJSON((protobuf.common as any)[commonType].nested);
+    try {
+      root.addJSON((protobuf.common as any)[commonType].nested);
+    } catch (e) {
+      console.warn(`[convert-proto-to-ts]: failed to load ${commonType}. ${e}`);
+    }
   }
 
   // Load in all the Google types
-  root.loadSync(collectProtos(url.fileURLToPath(path.dirname(resolve('protobufjs', import.meta.url)))));
+  try {
+    root.loadSync(collectProtos(url.fileURLToPath(path.dirname(resolve('protobufjs', import.meta.url)))));
+  } catch (e) {
+    console.warn(`[convert-proto-to-ts]: failed to load google types. ${e}`);
+  }
 
   if (!protoPaths.length) {
     throw new Error(`[convert-proto-to-ts]: no .proto files found in ${protoPath}`);
@@ -64,12 +72,16 @@ function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root
 
   // Due to bug noted here: https://github.com/protobufjs/protobuf.js/issues/1937
   // we need to load the files one-by-one so that errors are visible if a proto can't be loaded.
-  protoPaths.forEach((protoPath) => {
-    root.loadSync(protoPath, {
-      keepCase: config.fieldNameKeepCase,
-      alternateCommentMode: true,
-    });
-  });
+  for (const protoPath of protoPaths) {
+    try {
+      root.loadSync(protoPath, {
+        keepCase: config.fieldNameKeepCase,
+        alternateCommentMode: true,
+      });
+    } catch (e) {
+      console.warn(`[convert-proto-to-ts]: failed to load ${protoPath}. ${e}`);
+    }
+  }
 
   root.resolveAll();
 
@@ -148,13 +160,21 @@ export async function loadAndParseProtos(cwd: string, providedConfig: Config) {
     }
 
     console.log('Parsing cloned .proto files');
-    const root = collectAndParseProtos(tempDirPath, config);
 
-    // Clean up
-    console.log(`Removing cloned protos from temporary directory: ${tempDirPath}`);
-    fs.rmSync(tempDirPath, { recursive: true, force: true });
+    try {
+      const root = collectAndParseProtos(tempDirPath, config);
 
-    return root;
+      // Clean up
+      console.log(`Removing cloned protos from temporary directory: ${tempDirPath}`);
+      fs.rmSync(tempDirPath, { recursive: true, force: true });
+
+      return root;
+    } catch (e) {
+      console.error(`[convert-proto-to-ts]: failed to parse protos, removing temporary files. ${e}`);
+      fs.rmSync(tempDirPath, { recursive: true, force: true });
+
+      throw e;
+    }
   }
 
   if (config.protoPath) {

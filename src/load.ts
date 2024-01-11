@@ -31,19 +31,19 @@ function cloneGitRepository(cwd: string, repositoryUrl: string, tempFolder: stri
 }
 
 function collectProtos(dir: string): string[] {
-  const protos: string[] = [];
+  const protos = new Set<string>();
 
   fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.join(dir, file);
 
     if (fs.statSync(fullPath).isDirectory()) {
-      protos.push(...collectProtos(fullPath));
+      collectProtos(fullPath).forEach((proto) => protos.add(proto));
     } else if (path.extname(fullPath) === '.proto') {
-      protos.push(fullPath);
+      protos.add(fullPath);
     }
   });
 
-  return protos;
+  return Array.from(protos);
 }
 
 function collectAndParseProtos(protoPath: string, config: Config): protobuf.Root {

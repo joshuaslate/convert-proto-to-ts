@@ -297,7 +297,7 @@ export class ProtoToTypeScriptGenerator {
     const baseFieldType = this.convertFieldType(field, addImport);
     let member = ts.factory.createPropertySignature(
       undefined,
-      camelCase(field.name),
+      camelCase(field.name, { mergeAmbiguousCharacters: true }),
       field.optional || !field.required ? optionalFieldMarker : undefined,
       baseFieldType,
     );

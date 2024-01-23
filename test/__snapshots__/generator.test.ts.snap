@@ -56,6 +56,7 @@ export interface AuthV1User {
         language?: string;
         timezone?: string;
         theme?: 'THEME_UNSPECIFIED' | 'THEME_DARK' | 'THEME_LIGHT';
+        address?: AuthV1Address;
     };
     // start oneof "permission"
     fullAccess?: boolean;
@@ -66,6 +67,15 @@ export enum AuthV1Role {
     Unspecified = 'ROLE_UNSPECIFIED',
     Customer = 'ROLE_CUSTOMER',
     Admin = 'ROLE_ADMIN'
+}
+
+export interface AuthV1Address {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
 }
 
 ",

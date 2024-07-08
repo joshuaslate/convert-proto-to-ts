@@ -34,7 +34,7 @@
     "prettier": "^3.2.4",
     "rollup": "^4.9.6",
     "tslib": "^2.6.2",
-    "vitest": "^1.2.2"
+    "vitest": "^2.0.0"
   },
   "dependencies": {
     "change-case": "^5.4.2",
